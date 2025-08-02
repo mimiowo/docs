@@ -1,0 +1,778 @@
+# Informe de Programación - Proyecto Co-Link
+## Documentación Técnica Completa del Sistema
+
+### 1. RESUMEN EJECUTIVO
+
+El proyecto Co-Link es una plataforma web integral desarrollada para la gestión de cooperativas de vivienda. El sistema está implementado con una arquitectura moderna de microservicios, utilizando Laravel 11 para el backend API REST y JavaScript vanilla para el frontend, garantizando un rendimiento óptimo y facilidad de mantenimiento.
+
+**Características Principales:**
+- Sistema de gestión de usuarios con autenticación OAuth2
+- Portal administrativo completo (backoffice)
+- Registro y seguimiento de horas de trabajo
+- Gestión de pagos y comprobantes
+- Interfaz responsive y moderna
+- API RESTful documentada
+
+### 2. ARQUITECTURA DEL SISTEMA
+
+#### 2.1 Stack Tecnológico
+
+**Backend:**
+- **Framework**: Laravel 11.0
+- **Lenguaje**: PHP 8.2+
+- **Base de Datos**: MySQL 8.0 / MariaDB 10.6
+- **Autenticación**: Laravel Passport (OAuth2)
+- **Contenedores**: Docker con docker-compose
+- **Servidor Web**: Nginx
+
+**Frontend:**
+- **Tecnología**: JavaScript Vanilla ES6+
+- **CSS**: CSS3 con variables y Grid/Flexbox
+- **Responsive**: Mobile-first approach
+- **Módulos**: Arquitectura modular con clases ES6
+
+#### 2.2 Estructura del Proyecto
+
+```
+Proyecto-CoLink/
+├── Backend/ (api-cooperativa-laravel/)
+│   ├── app/Http/Controllers/
+│   ├── app/Models/
+│   ├── database/migrations/
+│   ├── routes/api.php
+│   └── docker-compose.yml
+└── Frontend/
+    ├── landing-page/
+    ├── user-portal/
+    ├── admin-backoffice/
+    └── shared/
+```
+
+### 3. BACKEND - API LARAVEL
+
+#### 3.1 Controladores Principales
+
+**AuthController**
+```php
+- register(): Registro de nuevos usuarios
+- login(): Autenticación con JWT tokens
+- Validaciones: email único, cédula válida, contraseña segura
+- Estados: usuarios pendientes de aprobación
+```
+
+**UserController**
+```php
+- me(): Perfil del usuario autenticado
+- update(): Actualización de datos personales
+- Middleware: auth:api para protección de rutas
+```
+
+**CooperativaController**
+```php
+- registroHoras(): Registro de horas de trabajo
+- subirPago(): Upload de comprobantes de pago
+- misHoras(): Consulta de horas registradas
+- misPagos(): Consulta de pagos realizados
+- resumen(): Dashboard con estadísticas personales
+```
+
+**BackofficeController**
+```php
+- dashboard(): Estadísticas administrativas
+- listarUsuarios(): Gestión de socios
+- aprobarUsuario(): Aprobación de solicitudes
+- listarHoras(): Revisión de horas trabajadas
+- stats(): Métricas y reportes
+```
+
+#### 3.2 Modelos y Base de Datos
+
+**User Model**
+```php
+- Campos: name, email, password, ci, telefono, direccion
+- Estados: aprobado (boolean), is_admin (boolean)
+- Relaciones: hasMany(RegistroHoras), hasMany(RegistroPago)
+- Autenticación: Passport tokens
+```
+
+**RegistroHoras Model**
+```php
+- Campos: user_id, etapa_obra_id, fecha, horas, descripcion
+- Validaciones: máximo 8 horas por día
+- Estados: aprobado por administrador
+- Relaciones: belongsTo(User), belongsTo(EtapaObra)
+```
+
+**RegistroPago Model**
+```php
+- Campos: user_id, monto, fecha_pago, comprobante_path
+- Upload: archivos PDF/imágenes
+- Estados: aprobado por administrador
+- Validaciones: monto positivo, fecha válida
+```
+
+**EtapaObra Model**
+```php
+- Campos: nombre, descripcion, activa
+- Relaciones: hasMany(RegistroHoras)
+- Estados: etapas activas/inactivas
+```
+
+#### 3.3 Migraciones de Base de Datos
+
+```sql
+-- Usuarios principales
+2025_07_28_015601_add_fields_to_users_table.php
+2025_07_28_015929_add_fields_to_users_table.php
+
+-- Gestión de trabajo
+2025_07_28_023126_create_etapas_obra_table.php
+2025_07_28_023127_create_registro_horas_table.php
+
+-- Gestión de pagos
+2025_07_28_023128_create_registro_pagos_table.php
+
+-- Viviendas
+2025_07_28_023129_create_unidad_habitacional_table.php
+```
+
+#### 3.4 Rutas API
+
+```php
+// Autenticación
+POST /api/usuarios/register - Registro de usuarios
+POST /api/usuarios/login - Login con credenciales
+
+// Usuario autenticado
+GET /api/usuarios/me - Perfil personal
+PUT /api/usuarios/update - Actualizar datos
+
+// Cooperativa (requiere autenticación)
+POST /api/cooperativa/horas - Registrar horas
+POST /api/cooperativa/pagos - Subir comprobante
+GET /api/cooperativa/mis-horas - Consultar horas
+GET /api/cooperativa/mis-pagos - Consultar pagos
+GET /api/cooperativa/resumen - Dashboard personal
+
+// Administración (requiere permisos admin)
+GET /api/backoffice/dashboard - Estadísticas generales
+GET /api/backoffice/usuarios - Lista de socios
+PUT /api/backoffice/usuarios/{id}/aprobar - Aprobar usuario
+GET /api/backoffice/horas - Lista de horas registradas
+GET /api/backoffice/stats - Métricas avanzadas
+```
+
+### 4. FRONTEND - APLICACIÓN WEB
+
+#### 4.1 Arquitectura Frontend
+
+**Módulos Principales:**
+- **shared/**: Componentes y utilidades compartidas
+- **landing-page/**: Página de registro público
+- **user-portal/**: Portal de usuarios autenticados
+- **admin-backoffice/**: Panel administrativo
+
+#### 4.2 Sistema de Configuración Global
+
+**config.js - Configuración Central**
+```javascript
+const API_CONFIG = {
+    baseURL: 'http://localhost:8000/api',
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+};
+
+const ENDPOINTS = {
+    auth: {
+        register: '/usuarios/register',
+        login: '/usuarios/login'
+    },
+    cooperativa: {
+        horas: '/cooperativa/horas',
+        pagos: '/cooperativa/pagos',
+        resumen: '/cooperativa/resumen'
+    },
+    backoffice: {
+        usuarios: '/backoffice/usuarios',
+        dashboard: '/backoffice/dashboard',
+        stats: '/backoffice/stats'
+    }
+};
+```
+
+#### 4.3 Cliente API Universal
+
+**utils.js - ApiClient Class**
+```javascript
+class ApiClient {
+    constructor(config) {
+        this.baseURL = config.baseURL;
+        this.timeout = config.timeout;
+        this.defaultHeaders = config.headers;
+    }
+
+    async request(endpoint, options = {}) {
+        // Manejo automático de tokens
+        // Control de errores HTTP
+        // Timeout y retry logic
+        // Parsing automático de JSON
+    }
+
+    // Métodos HTTP
+    async get(endpoint, params = {}) 
+    async post(endpoint, data = {})
+    async put(endpoint, data = {})
+    async delete(endpoint)
+}
+```
+
+#### 4.4 Sistema de Validaciones
+
+**Validación de Cédula Simplificada**
+```javascript
+function isCedula(cedula) {
+    // Acepta 6-8 dígitos con formato flexible
+    // Permite puntos y guiones opcionales
+    const cleaned = cedula.replace(/[.-]/g, '');
+    return /^\d{6,8}$/.test(cleaned);
+}
+
+function isEmail(email) {
+    // Validación RFC 5322 completa
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
+```
+
+### 5. LANDING PAGE - REGISTRO PÚBLICO
+
+#### 5.1 Características Técnicas
+
+**landing.js - Clase Principal**
+```javascript
+class LandingPage {
+    constructor() {
+        this.apiClient = new ApiClient(API_CONFIG);
+        this.init();
+    }
+
+    init() {
+        // Event listeners para formularios
+        // Validación en tiempo real
+        // Manejo de errores visuales
+    }
+
+    async handleRegistration(event) {
+        // Mapeo de datos al formato backend
+        const backendData = {
+            name: data.nombre,
+            email: data.email,
+            ci: data.cedula,
+            telefono: data.telefono,
+            direccion: data.direccion || '',
+            password: 'temporal123',
+            password_confirmation: 'temporal123'
+        };
+    }
+}
+```
+
+**CSS Responsive**
+```css
+/* Mobile-first approach */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+}
+```
+
+### 6. USER PORTAL - PORTAL DE USUARIOS
+
+#### 6.1 Dashboard de Usuario
+
+**Funcionalidades:**
+- Resumen de horas trabajadas
+- Estado de pagos realizados
+- Formularios de registro rápido
+- Historial de actividades
+
+**dashboard.js - Gestión de Estado**
+```javascript
+class UserDashboard {
+    constructor() {
+        this.apiClient = new ApiClient(API_CONFIG);
+        this.currentUser = null;
+        this.stats = null;
+    }
+
+    async loadDashboard() {
+        try {
+            // Cargar datos del usuario
+            this.currentUser = await this.apiClient.get('/usuarios/me');
+            
+            // Cargar estadísticas
+            this.stats = await this.apiClient.get('/cooperativa/resumen');
+            
+            // Renderizar interfaz
+            this.renderUserInfo();
+            this.renderStats();
+            this.renderRecentActivity();
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+}
+```
+
+#### 6.2 Sistema de Pagos Modernizado
+
+**payments.html - Interfaz Completa**
+- Formulario de subida con drag & drop
+- Previsualización de archivos
+- Validación de tipos de archivo
+- Estados visuales (pendiente, aprobado, rechazado)
+- Filtros avanzados por fecha y estado
+
+**payments.css - Sistema de Diseño**
+```css
+:root {
+    --primary-color: #2563eb;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --error-color: #dc2626;
+    --bg-light: #f8fafc;
+}
+
+.payment-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.payment-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+```
+
+### 7. ADMIN BACKOFFICE - PANEL ADMINISTRATIVO
+
+#### 7.1 Dashboard Administrativo
+
+**admin-dashboard.html**
+- Métricas en tiempo real
+- Gráficos de estadísticas
+- Lista de usuarios pendientes
+- Herramientas de gestión rápida
+
+**dashboard.js - Administración**
+```javascript
+class AdminDashboard {
+    constructor() {
+        this.apiClient = new ApiClient(API_CONFIG);
+        this.users = [];
+        this.stats = {};
+    }
+
+    async loadAdminData() {
+        // Estadísticas generales
+        this.stats = await this.apiClient.get('/backoffice/stats');
+        
+        // Usuarios pendientes
+        this.users = await this.apiClient.get('/backoffice/usuarios');
+        
+        // Renderizar dashboard
+        this.renderStats();
+        this.renderPendingUsers();
+    }
+
+    async approveUser(userId) {
+        try {
+            await this.apiClient.put(`/backoffice/usuarios/${userId}/aprobar`);
+            this.showSuccess('Usuario aprobado exitosamente');
+            this.loadAdminData(); // Recargar datos
+        } catch (error) {
+            this.showError('Error al aprobar usuario');
+        }
+    }
+}
+```
+
+### 8. CARACTERÍSTICAS TÉCNICAS AVANZADAS
+
+#### 8.1 Manejo de Autenticación
+
+**Token Management**
+```javascript
+class AuthManager {
+    static setToken(token) {
+        localStorage.setItem('auth_token', token);
+    }
+
+    static getToken() {
+        return localStorage.getItem('auth_token');
+    }
+
+    static isAuthenticated() {
+        return !!this.getToken();
+    }
+
+    static logout() {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/login.html';
+    }
+}
+```
+
+#### 8.2 Upload de Archivos
+
+**File Upload con Progress**
+```javascript
+async uploadFile(file, progressCallback) {
+    const formData = new FormData();
+    formData.append('comprobante', file);
+    formData.append('monto', this.amount);
+    formData.append('fecha_pago', this.date);
+
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressCallback(percentComplete);
+        }
+    });
+
+    return new Promise((resolve, reject) => {
+        xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+        xhr.onerror = () => reject(new Error('Upload failed'));
+        xhr.open('POST', `${API_CONFIG.baseURL}/cooperativa/pagos`);
+        xhr.setRequestHeader('Authorization', `Bearer ${AuthManager.getToken()}`);
+        xhr.send(formData);
+    });
+}
+```
+
+#### 8.3 Responsive Design System
+
+**CSS Grid Layout**
+```css
+.dashboard-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mobile-stack {
+        flex-direction: column;
+    }
+}
+```
+
+### 9. SEGURIDAD IMPLEMENTADA
+
+#### 9.1 Backend Security
+
+- **CSRF Protection**: Tokens automáticos en formularios
+- **XSS Prevention**: Escape de datos en templates
+- **SQL Injection**: Eloquent ORM con prepared statements
+- **Rate Limiting**: Throttling en rutas sensibles
+- **CORS Configuration**: Headers configurados correctamente
+
+#### 9.2 Frontend Security
+
+- **Token Storage**: localStorage con caducidad
+- **Input Validation**: Validación client-side y server-side
+- **HTTPS Enforcement**: Redirects automáticos
+- **Content Security Policy**: Headers de seguridad
+
+### 10. OPTIMIZACIONES DE RENDIMIENTO
+
+#### 10.1 Backend Optimizations
+
+```php
+// Cache de consultas frecuentes
+Cache::remember('users_stats', 3600, function () {
+    return User::selectRaw('
+        COUNT(*) as total,
+        SUM(aprobado) as approved,
+        COUNT(*) - SUM(aprobado) as pending
+    ')->first();
+});
+
+// Eager loading para evitar N+1
+$users = User::with(['registroHoras', 'registroPagos'])->get();
+
+// Paginación automática
+$users = User::paginate(20);
+```
+
+#### 10.2 Frontend Optimizations
+
+```javascript
+// Lazy loading de módulos
+const loadDashboard = async () => {
+    const { UserDashboard } = await import('./dashboard.js');
+    return new UserDashboard();
+};
+
+// Debounce en búsquedas
+const debouncedSearch = debounce((query) => {
+    this.searchUsers(query);
+}, 300);
+
+// Cache de API responses
+class CachedApiClient extends ApiClient {
+    constructor(config) {
+        super(config);
+        this.cache = new Map();
+    }
+
+    async get(endpoint, params = {}) {
+        const cacheKey = `${endpoint}${JSON.stringify(params)}`;
+        if (this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+        
+        const response = await super.get(endpoint, params);
+        this.cache.set(cacheKey, response);
+        return response;
+    }
+}
+```
+
+### 11. TESTING Y CALIDAD
+
+#### 11.1 Backend Testing
+
+```php
+// Feature Tests
+class UserRegistrationTest extends TestCase {
+    public function test_user_can_register() {
+        $response = $this->postJson('/api/usuarios/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'ci' => '1234567',
+            'password' => 'password123',
+            'password_confirmation' => 'password123'
+        ]);
+
+        $response->assertStatus(201)
+                ->assertJsonStructure(['success', 'data']);
+    }
+}
+
+// Unit Tests
+class UserModelTest extends TestCase {
+    public function test_user_has_registro_horas_relationship() {
+        $user = User::factory()->create();
+        $this->assertInstanceOf(
+            HasMany::class,
+            $user->registroHoras()
+        );
+    }
+}
+```
+
+#### 11.2 Frontend Testing
+
+```javascript
+// Unit Tests con Jest
+describe('ApiClient', () => {
+    test('should handle authentication', async () => {
+        const client = new ApiClient(API_CONFIG);
+        AuthManager.setToken('test-token');
+        
+        const response = await client.get('/test');
+        expect(response).toBeDefined();
+    });
+});
+
+// Integration Tests
+describe('User Registration Flow', () => {
+    test('should register user successfully', async () => {
+        const landing = new LandingPage();
+        const formData = {
+            nombre: 'Test User',
+            email: 'test@example.com',
+            cedula: '1234567'
+        };
+        
+        const result = await landing.submitRegistration(formData);
+        expect(result.success).toBe(true);
+    });
+});
+```
+
+### 12. DEPLOYMENT Y DEVOPS
+
+#### 12.1 Docker Configuration
+
+**docker-compose.yml**
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=mysql
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: colink_db
+      MYSQL_ROOT_PASSWORD: secure_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/certs
+```
+
+#### 12.2 CI/CD Pipeline
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy Co-Link
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
+        
+      - name: Run tests
+        run: php artisan test
+        
+      - name: Deploy to production
+        run: |
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+```
+
+### 13. DOCUMENTACIÓN DE API
+
+#### 13.1 Endpoints Documentados
+
+```yaml
+# OpenAPI 3.0 specification
+openapi: 3.0.0
+info:
+  title: Co-Link API
+  version: 1.0.0
+  description: API para gestión de cooperativa de vivienda
+
+paths:
+  /usuarios/register:
+    post:
+      summary: Registro de nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, ci, password]
+              properties:
+                name:
+                  type: string
+                  example: "Juan Pérez"
+                email:
+                  type: string
+                  format: email
+                ci:
+                  type: string
+                  example: "1234567"
+```
+
+### 14. MONITOREO Y LOGS
+
+#### 14.1 Logging System
+
+```php
+// Laravel Logging
+Log::channel('daily')->info('User registered', [
+    'user_id' => $user->id,
+    'email' => $user->email,
+    'ip' => request()->ip()
+]);
+
+// Error Tracking
+app('sentry')->captureException($exception);
+```
+
+#### 14.2 Performance Monitoring
+
+```javascript
+// Frontend Performance
+class PerformanceMonitor {
+    static trackPageLoad() {
+        window.addEventListener('load', () => {
+            const loadTime = performance.now();
+            this.sendMetric('page_load_time', loadTime);
+        });
+    }
+
+    static trackApiCall(endpoint, duration) {
+        this.sendMetric('api_response_time', {
+            endpoint,
+            duration
+        });
+    }
+}
+```
+
+El proyecto Co-Link representa una solución integral y moderna para la gestión de cooperativas de vivienda, implementada con las mejores prácticas de desarrollo web actual y preparada para escalar según las necesidades futuras de la organización.
