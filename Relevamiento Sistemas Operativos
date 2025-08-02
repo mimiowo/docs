@@ -1,0 +1,205 @@
+# Relevamiento y Justificación de Sistemas Operativos
+## Proyecto Co-Link - Infraestructura Tecnológica
+
+### 1. SISTEMA OPERATIVO PARA SERVIDORES
+
+#### 1.1 Recomendación: Ubuntu Server 22.04 LTS
+
+**Justificación Técnica:**
+- **Estabilidad**: Versión LTS (Long Term Support) con soporte hasta 2027
+- **Compatibilidad**: Excelente soporte para Docker, PHP 8.2, Node.js y MySQL
+- **Seguridad**: Actualizaciones automáticas de seguridad y parches regulares
+- **Rendimiento**: Optimizado para cargas de trabajo web y bases de datos
+- **Comunidad**: Amplia documentación y soporte comunitario
+
+**Especificaciones del Servidor:**
+- **CPU**: 4 vCPUs mínimo (8 vCPUs recomendado para producción)
+- **RAM**: 8GB mínimo (16GB recomendado)
+- **Almacenamiento**: 100GB SSD mínimo (500GB recomendado)
+- **Red**: Conexión estable de 100Mbps mínimo
+
+#### 1.2 Stack Tecnológico del Servidor
+
+**Componentes Principales:**
+- **Sistema Operativo**: Ubuntu Server 22.04 LTS
+- **Servidor Web**: Nginx 1.18+
+- **PHP**: PHP 8.2 con extensiones (mbstring, pdo, xml, curl)
+- **Base de Datos**: MySQL 8.0 o MariaDB 10.6
+- **Contenedores**: Docker 24.0+ y Docker Compose 2.0+
+- **Gestión de Procesos**: Supervisor para servicios Laravel
+- **Certificados SSL**: Let's Encrypt con renovación automática
+
+#### 1.3 Plan de Soporte Técnico para Servidores
+
+**Nivel 1 - Soporte Básico (Incluido)**
+- Actualizaciones automáticas de seguridad
+- Documentación oficial de Ubuntu
+- Foros comunitarios y Stack Overflow
+- **Costo**: Gratuito
+- **SLA**: Mejor esfuerzo comunitario
+
+**Nivel 2 - Ubuntu Pro (Recomendado)**
+- **Características**:
+  - Extended Security Maintenance (ESM)
+  - Kernel Livepatch para actualizaciones sin reinicio
+  - FIPS 140-2 certified modules
+  - Common Criteria EAL2 certification
+- **Costo**: $500 USD/año por servidor físico
+- **SLA**: 99.5% uptime, soporte 8x5
+
+**Nivel 3 - Ubuntu Advantage for Infrastructure**
+- **Características**:
+  - Todo lo incluido en Ubuntu Pro
+  - Soporte telefónico 24x7
+  - Gestión de vulnerabilidades
+  - Compliance y auditorías
+- **Costo**: $1,500 USD/año por servidor
+- **SLA**: 99.9% uptime, soporte 24x7
+
+#### 1.4 Alternativas Evaluadas
+
+| Sistema Operativo | Ventajas | Desventajas | Costo Anual |
+|-------------------|----------|-------------|-------------|
+| **Red Hat Enterprise Linux** | Soporte empresarial robusto | Alto costo, complejidad | $800-2,000 USD |
+| **CentOS Stream** | Gratuito, compatible RHEL | Ciclo de vida más corto | Gratuito |
+| **Debian 12** | Muy estable, seguro | Paquetes más antiguos | Gratuito |
+| **Windows Server 2022** | Familiar para equipos .NET | Licencias costosas, recursos | $1,069 USD |
+
+### 2. SISTEMA OPERATIVO PARA TERMINALES ADMINISTRATIVAS
+
+#### 2.1 Recomendación: Windows 11 Pro
+
+**Justificación Técnica:**
+- **Compatibilidad**: Soporte completo para aplicaciones de oficina y navegadores
+- **Seguridad**: Windows Defender, BitLocker, Windows Hello
+- **Gestión**: Active Directory integration, Group Policy management
+- **Productividad**: Suite Office 365, herramientas de colaboración
+- **Soporte**: Soporte oficial de Microsoft y amplia base de conocimiento
+
+**Especificaciones Mínimas por Terminal:**
+- **CPU**: Intel Core i5 8th gen o AMD Ryzen 5 3000 series
+- **RAM**: 8GB DDR4 (16GB recomendado)
+- **Almacenamiento**: 256GB SSD
+- **Pantalla**: Monitor Full HD 24" mínimo
+- **Red**: Ethernet Gigabit + WiFi 6
+
+#### 2.2 Software Requerido por Terminal
+
+**Aplicaciones Esenciales:**
+- **Navegador**: Google Chrome Enterprise o Microsoft Edge
+- **Oficina**: Microsoft Office 365 Business Standard
+- **Seguridad**: Windows Defender + Antivirus corporativo
+- **Comunicación**: Microsoft Teams, Zoom
+- **Desarrollo** (para soporte técnico): Visual Studio Code, Git
+- **PDF**: Adobe Acrobat Reader DC
+
+#### 2.3 Plan de Soporte Técnico para Terminales
+
+**Nivel 1 - Windows 11 Pro (Base)**
+- **Características**:
+  - Actualizaciones automáticas de Windows
+  - Windows Defender incluido
+  - Soporte comunitario Microsoft
+- **Costo**: $199 USD por licencia (una vez)
+- **SLA**: Mejor esfuerzo, actualizaciones automáticas
+
+**Nivel 2 - Microsoft 365 Business Premium (Recomendado)**
+- **Características**:
+  - Office 365 completo (Word, Excel, PowerPoint, Outlook)
+  - Teams, SharePoint, OneDrive (1TB por usuario)
+  - Windows 11 Enterprise E3
+  - Microsoft Defender for Business
+  - Intune para gestión de dispositivos
+- **Costo**: $22 USD/usuario/mes
+- **SLA**: 99.9% uptime para servicios cloud
+
+**Nivel 3 - Enterprise Support Plus**
+- **Características**:
+  - Todo lo incluido en Business Premium
+  - Soporte telefónico prioritario
+  - Gestión avanzada de seguridad
+  - Análisis avanzado de amenazas
+- **Costo**: $8 USD/usuario/mes adicional
+- **SLA**: Soporte 24x7, respuesta en 1 hora para críticos
+
+#### 2.4 Alternativas para Terminales Administrativas
+
+| Sistema Operativo | Ventajas | Desventajas | Costo por Terminal |
+|-------------------|----------|-------------|-------------------|
+| **macOS (Mac mini)** | Interfaz intuitiva, seguridad | Costo hardware alto, menos software | $600-1,200 USD |
+| **Ubuntu Desktop 22.04** | Gratuito, seguro | Curva aprendizaje, menos software de oficina | Gratuito |
+| **Windows 10 Pro** | Menor costo, familiar | Fin de soporte en 2025 | $139 USD |
+
+### 3. ARQUITECTURA DE RED Y SEGURIDAD
+
+#### 3.1 Topología de Red Recomendada
+```
+Internet
+    |
+[Firewall/Router]
+    |
+[Switch Principal]
+    |
+    +-- [Servidor Co-Link] (IP fija)
+    +-- [Terminales Admin] (DHCP con reserva)
+    +-- [WiFi Access Point] (red segregada)
+```
+
+#### 3.2 Políticas de Seguridad
+
+**Para Servidores:**
+- Firewall UFW configurado (solo puertos 80, 443, 22)
+- Acceso SSH con claves públicas únicamente
+- Fail2ban para protección contra ataques de fuerza bruta
+- Respaldos automáticos diarios encriptados
+- Monitoreo con logs centralizados
+
+**Para Terminales:**
+- Windows Defender + Bitlocker habilitado
+- Políticas de grupo para restricción de software
+- VPN para acceso remoto (OpenVPN o WireGuard)
+- Respaldos automáticos a OneDrive/SharePoint
+- Actualizaciones automáticas habilitadas
+
+### 4. CRONOGRAMA DE IMPLEMENTACIÓN
+
+#### Fase 1 - Servidores (Semana 1-2)
+- Día 1-3: Instalación Ubuntu Server 22.04 LTS
+- Día 4-5: Configuración Docker y servicios base
+- Día 6-7: Despliegue aplicación Co-Link
+- Día 8-10: Configuración seguridad y respaldos
+- Día 11-14: Pruebas de carga y optimización
+
+#### Fase 2 - Terminales (Semana 3-4)
+- Día 1-2: Adquisición e instalación hardware
+- Día 3-5: Instalación Windows 11 Pro y software base
+- Día 6-8: Configuración Office 365 y cuentas usuarios
+- Día 9-10: Implementación políticas de seguridad
+- Día 11-14: Capacitación usuarios y documentación
+
+### 5. PRESUPUESTO ESTIMADO ANUAL
+
+#### Servidores (1 servidor principal + 1 backup)
+- **Ubuntu Pro**: $1,000 USD/año
+- **Hardware amortizado**: $3,000 USD/año
+- **Hosting/Cloud**: $2,400 USD/año
+- **Subtotal Servidores**: $6,400 USD/año
+
+#### Terminales (5 estaciones administrativas)
+- **Licencias Windows 11 Pro**: $995 USD (una vez)
+- **Microsoft 365 Business Premium**: $1,320 USD/año (5 usuarios × $22 × 12)
+- **Hardware amortizado**: $2,500 USD/año
+- **Soporte técnico**: $480 USD/año
+- **Subtotal Terminales**: $5,295 USD/año
+
+#### Total Infraestructura
+- **Año 1**: $12,690 USD (incluye licencias iniciales)
+- **Años siguientes**: $11,695 USD/año
+
+### 6. RECOMENDACIONES ADICIONALES
+
+1. **Monitoreo**: Implementar Nagios o Zabbix para monitoreo de infraestructura
+2. **Respaldos**: Estrategia 3-2-1 (3 copias, 2 medios diferentes, 1 offsite)
+3. **Documentación**: Mantener documentación actualizada de todos los sistemas
+4. **Capacitación**: Plan de capacitación continua para usuarios administrativos
+5. **Auditorías**: Revisiones de seguridad trimestrales
